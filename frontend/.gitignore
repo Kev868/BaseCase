@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env.local
+*.local
+
+# the old vanilla-JS key file; replaced by .env.local
+config.local.js

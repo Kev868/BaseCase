@@ -1,0 +1,127 @@
+# The model zoo: every model this service can use, of every kind.
+#
+# `role` is what a model is FOR. Exactly one model per role is active at a
+# time, so swapping the pose model is the same operation as swapping the
+# detector. `type` is how it is BUILT; the table in zoo/roles.py maps each
+# type to its role and its constructor.
+#
+# Adding a model is an entry here plus, at most, a class in the folder its
+# role belongs to (detectors/, attributes/, skills/). Anything that cannot run
+# on this machine reports available: false with a reason, and the service
+# still boots.
+
+models:
+  # --- detectors -----------------------------------------------------
+  # Open vocabulary, and the default: the agent invents class names, so a
+  # fixed vocabulary would refuse most of them. Stays in PyTorch because a
+  # TensorRT export would bake the prompt vocabulary into the engine.
+  - name: yoloe
+    role: detector
+    type: yoloe
+    weights: yoloe-11s-seg.pt
+    preload: true
+
+  # Fixed 80-class COCO. Faster, and the fallback when a prompt is a COCO noun.
+  - name: coco
+    role: detector
+    type: ultralytics_fixed
+    weights: yolo11s.pt
+    preload: true
+
+  # Same weights, compiled. GPU host only; unavailable everywhere else.
+  - name: coco_trt
+    role: detector
+    type: ultralytics_fixed
+    weights: yolo11s.engine
+    requires_cuda: true
+    preload: true
+
+  # No model behind it. Lets the loop, the hot-swap and the UI run on a laptop
+  # with no weights and no GPU.
+  - name: fake
+    role: detector
+    type: fake
+    preload: true
+
+  # Reserved for /describe sweeps, never used by the frame loop. A sweep asks
+  # about forty classes at once, and doing that to whatever the camera is
+  # currently tracking with would re-point it mid-track. `sweep: true` marks
+  # it as the spare; the active detector is never chosen, whichever it is.
+  - name: scene
+    role: detector
+    type: yoloe
+    weights: yoloe-11s-seg.pt
+    sweep: true
+    preload: false
+
+  # --- embedders -----------------------------------------------------
+  # Attributes, reference matching and re-identification all read this. With
+  # no embedder the pipeline still runs; attribute checks simply never match.
+  - name: clip
+    role: embedder
+    type: open_clip
+    weights: ViT-B-32/laion2b_s34b_b79k
+    preload: true
+
+  # --- pose ----------------------------------------------------------
+  # Loaded only while a gesture behaviour is active, so a pipeline with no
+  # pose_trigger pays nothing for one being possible.
+  - name: pose
+    role: pose
+    type: ultralytics_pose
+    weights: yolo11n-pose.pt
+    preload: false
+
+  # The same 17 COCO keypoints from a larger checkpoint: more accurate at
+  # distance and on partly hidden people, ~1.5x the time. Selectable with
+  # POST /model {"name": "pose_fullbody", "role": "pose"}, and every gesture
+  # rule works against it unchanged, because the keypoint order is the same.
+  - name: pose_fullbody
+    role: pose
+    type: ultralytics_pose
+    weights: yolo11s-pose.pt
+    preload: false
+
+  # --- hands ---------------------------------------------------------
+  # MediaPipe Hands: 21 landmarks per hand, CPU at ~30fps, no weights file and
+  # no GPU contention with the detector. Its own role rather than a second
+  # pose model on purpose — one model per role is active at a time, so sharing
+  # would make "raise your hand" and "raise your index finger" mutually
+  # exclusive, and both want to run.
+  #
+  # `mediapipe` is not in requirements.txt: without it this entry reports
+  # available: false with a reason and everything else still boots.
+  - name: hands
+    role: hands
+    type: mediapipe_hands
+    preload: false
+
+  # --- wholebody -----------------------------------------------------
+  # RTMPose in the COCO-WholeBody layout: 133 points — body, feet, face and
+  # both hands from one pass. ONNX on CPU, so it leaves the GPU to the
+  # detector, and it fetches its own weights on first load.
+  #
+  # Its own role rather than a `pose` entry because the roles are a contract
+  # about keypoint layout, not just about what a model can see: everything in
+  # `pose` is COCO-17, and a behaviour asking for a body gesture would index
+  # 133 points as if they were 17. The first 17 here *are* COCO, which is why
+  # skills/wholebody.py slices rather than reimplements.
+  #
+  # `rtmlib` is optional, like mediapipe: without it this reports
+  # available: false with a reason and everything else still boots.
+  - name: wholebody
+    role: wholebody
+    type: rtmpose_wholebody
+    preload: false
+
+  # --- ocr -----------------------------------------------------------
+  # Reads characters off the frame for the keyboard skill. Unlike every other
+  # aux model this one is far too slow to run inline (150-400ms), so it keeps
+  # its own thread and the loop takes whatever read finished last.
+  #
+  # `easyocr` is optional, like mediapipe and rtmlib: without it the keyboard
+  # behaviour is paused with a reason and everything else still boots.
+  - name: ocr
+    role: ocr
+    type: easyocr
+    preload: false

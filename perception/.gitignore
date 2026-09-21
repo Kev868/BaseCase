@@ -1,0 +1,4 @@
+# Service-specific. Everything general lives in the repo-root .gitignore.
+
+# Ultralytics writes its settings here on first run.
+settings.json

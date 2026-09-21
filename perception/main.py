@@ -1,0 +1,74 @@
+"""Entry point. Wires the threads together and hands them to the server.
+
+    cd perception
+    uvicorn main:app --host 0.0.0.0 --port 8001
+
+Everything configurable comes from the environment; see config.py. Bind to
+0.0.0.0 and read service URLs from env vars, because on the day the car, the
+orchestrator and this process are rarely on the same machine.
+"""
+
+from __future__ import annotations
+
+import logging
+
+from config import CFG, resolve_device, setup_logging
+from zoo.registry import Registry
+from runtime.workers import Builder
+from runtime.capture import Capture
+from runtime.events import make_buses
+from runtime.loop import InferenceLoop
+from runtime.health import Health
+from runtime.world import Shared
+from server.api import Service, create_app
+from actuator.virtual import VirtualMotor
+
+log = logging.getLogger("perception.main")
+
+
+def build() -> Service:
+    """Construct everything. Model loading happens here; threads start later."""
+    setup_logging()
+    log.info("device=%s imgsz=%s source=%s", resolve_device(), CFG.IMGSZ, CFG.VIDEO_SOURCE)
+
+    registry = Registry.from_yaml()
+    failed = registry.preload()
+    if failed:
+        log.warning("models failed to preload: %s", failed)
+
+    events, states = make_buses()
+    health = Health(emit=events.publish)
+
+    # The embedder comes from the zoo like every other model, and is optional:
+    # without it, behaviours with no attributes still work and ones that need
+    # attributes simply never match. Better than refusing to start.
+    encoder = registry.try_get_active("embedder")
+
+    # The service comes up even with no usable detector: it reports its
+    # status rather than refusing to start, so the operator sees what is wrong.
+    if not any(e["loaded"] for e in registry.manifest()):
+        health.status, health.detail = "fault", f"no model loaded; failed: {failed}"
+
+    capture = Capture()
+    builder = Builder(registry, default_model=_default_model(registry), encoder=encoder)
+    shared = Shared()
+    shared.bank.encoder = encoder
+    loop = InferenceLoop(capture, builder, health, states, events, shared,
+                         actuator=VirtualMotor(), registry=registry)
+    return Service(registry=registry, capture=capture, builder=builder, loop=loop,
+                   health=health, events=events, states=states)
+
+
+def _default_model(registry: Registry) -> str:
+    """The zoo already prefers an open-vocabulary detector, because the agent
+    invents class names and a fixed vocabulary would refuse most of them."""
+    return registry.active("detector") or "yoloe"
+
+
+app = create_app(build())
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host=CFG.HOST, port=CFG.PORT, log_level=CFG.LOG_LEVEL.lower())

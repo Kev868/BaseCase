@@ -1,0 +1,219 @@
+/* ---------- platform wall / fascia ---------- */
+
+.topbar {
+  flex: 0 0 auto;
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  background: var(--wall) repeat;
+  border-bottom: 6px solid var(--ink);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--plate);
+  border: 3px solid var(--ink);
+  padding: 10px 22px 10px 16px;
+}
+
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50% !important;
+  background: var(--rust);
+  box-shadow: inset 0 0 0 5px var(--plate), inset 0 0 0 9px var(--ochre);
+}
+
+.brand-text {
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+/* ---------- columns ---------- */
+
+/* The camera takes the left half: it is what the room is looking at. The
+   right half is the instruction with its status and timer on top, and the
+   logs folded underneath. */
+.grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.col-camera { flex: 1 1 50%; }
+.col-side { flex: 1 1 50%; }
+
+.panel {
+  background: var(--plate);
+  border: 3px solid var(--ink);
+  padding: 0 18px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Nothing escapes its panel. Without this a squeezed column renders its
+     content straight over the panel below it, which is how the stage strip
+     ended up drawn across the behaviours and events headers. */
+  overflow: hidden;
+}
+
+/* The camera fills its column; the video itself is the only thing in it. */
+.panel-video { flex: 1 1 auto; min-height: 0; }
+
+/* Instruction sizes to its content, and gives the rest to the logs.
+
+   Do NOT put a max-height on this. The composer cannot shrink — a mic button,
+   a textarea, the chips and the SEND/+IMAGE/STOP row are all fixed-height —
+   and `.panel` clips its overflow, so a cap does not squeeze the panel, it
+   cuts the buttons off the bottom. The room for the logs is bought by keeping
+   the *content* small (see the transcript cap and the composer sizes in
+   panels.css), which is the only way the panel is always exactly as tall as
+   what is in it and can never clip. */
+.panel-chat { flex: 0 0 auto; }
+
+.panel-scroll {
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* black signage band across the head of every panel */
+.panel-title {
+  margin: 0 -18px 16px;
+  padding: 9px 18px;
+  background: var(--ink);
+  color: var(--plate);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--ochre);
+  padding: 1px 8px;
+}
+
+.panel-scroll {
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ---------- narrow / stacked ---------- */
+
+@media (max-width: 1100px) {
+  .grid { flex-direction: column; overflow: auto; }
+  .col-camera, .col-side { flex: 0 0 auto; }
+  .panel-video { min-height: 46vh; }
+  .accordion { overflow: visible; }
+  .fold.open { flex: 0 0 auto; min-height: 30vh; }
+  body { overflow: auto; }
+  #root { height: auto; min-height: 100%; }
+  .brand-text { font-size: 22px; }
+}
+
+/* ---------- accordion ---------- */
+
+/* The logs take everything the instruction above them does not need. No floor:
+   the panel above cannot shrink, so a floor here would push the last sections
+   off the bottom of the column rather than making room. `overflow: auto` is
+   what handles a short window. */
+.accordion {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+}
+
+.fold {
+  background: var(--plate);
+  border: 3px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+/* An open section takes a share of the height; a closed one costs a header.
+   96px is what lets three be open at once without the accordion scrolling. */
+.fold.open { flex: 1 1 0; min-height: 96px; }
+
+.fold-head {
+  margin: 0;
+  padding: 0 14px 0 0;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.fold-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ttc);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--plate);
+  background: transparent;
+  border: 0;
+  /* Five headers are five headers whether or not anything is open, so they are
+     kept tight: at the old padding they cost 270px before a row was drawn. */
+  padding: 7px 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.fold-toggle:hover { color: var(--ochre); }
+
+.fold-mark {
+  font-size: 12px;
+  color: var(--ochre);
+  width: 12px;
+  flex: 0 0 auto;
+}
+
+.fold-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px 12px;
+  overflow: hidden;
+}

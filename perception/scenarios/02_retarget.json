@@ -1,0 +1,18 @@
+{
+  "name": "retarget and model swap",
+  "clip": "clips/real.mp4",
+  "model": "yoloe",
+  "duration_s": 22,
+  "steps": [
+    {"at": 1.0,  "add": {"kind": "track", "render": {"label": "the bus"},
+                         "subject": {"detect": ["bus"], "pick": "ref"}}},
+    {"at": 8.0,  "add": {"kind": "track", "render": {"label": "a person"},
+                         "subject": {"detect": ["person"], "pick": "ref"}}},
+    {"at": 12.0, "remove": "b1"},
+    {"at": 16.0, "model": "coco"}
+  ],
+  "expect": {
+    "b1": {"reaches": "TRACKING", "acquire_under_ms": 2000},
+    "b2": {"reaches": "TRACKING", "acquire_under_ms": 2000, "events": ["acquired"]}
+  }
+}
