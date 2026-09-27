@@ -167,6 +167,11 @@ class AttributeBank:
         self._baseline: dict[str, np.ndarray] = {}  # class name -> vector
         self._refs: dict[str, np.ndarray] = {}      # reference id -> vector
         self._cache: dict[int, Scored] = {}
+        #: Track ids in the most recent frame. The cache outlives tracks by
+        #: design, so anything that ranks tracks against each other must ask
+        #: this, not the cache, who is actually on screen. Replaced whole,
+        #: never mutated, so a reader on another thread sees one frame's set.
+        self._live: frozenset[int] = frozenset()
         self.encodes = 0
 
     # 2a. Vocabulary, filled by the worker -----------------------------
@@ -192,10 +197,10 @@ class AttributeBank:
         # gating on attributes meant a follow-cam could never reacquire its
         # target. Scoring phrases on top of the embedding is free, and the
         # per-track cache keeps the forward pass rare.
-        if self.encoder is None or len(dets) == 0:
-            return
         ids = dets.tracker_id
-        if ids is None:
+        self._live = (frozenset(int(v) for v in ids)
+                      if ids is not None and len(dets) else frozenset())
+        if self.encoder is None or len(dets) == 0 or ids is None:
             return
 
         stale = [i for i in range(len(dets)) if self._stale(int(ids[i]), now)][: self.batch]
@@ -296,17 +301,29 @@ class AttributeBank:
         everything on screen. In a frame with four people CLIP scores all of
         them near any one person, so a bare threshold matches everybody or
         nobody depending on the light.
+
+        On screen means this frame, not the cache. Entries outlive their
+        tracks, and the track most likely to still be cached is the same person
+        under their previous id, from before an occlusion. Ranked against that
+        ghost, the returning track can never clear the margin, which leaves the
+        follow-cam unable to reacquire and blurs the one face "except mine" was
+        meant to keep.
         """
         if not reference_ids:
             return True
-        entry = self._cache.get(int(track_id))
+        tid = int(track_id)
+        entry = self._cache.get(tid)
         if entry is None or not entry.ref_sims:
             return None
         from attributes.references import best_match
 
+        rivals = {tid: entry}
+        for other in self._live:
+            e = self._cache.get(other)
+            if e is not None and e.ref_sims:
+                rivals[other] = e
         for ref in reference_ids:
-            sims = {tid: e.ref_sims.get(ref, 0.0) for tid, e in self._cache.items()
-                    if e.ref_sims}
-            if best_match(sims, min_sim) == int(track_id):
+            sims = {t: e.ref_sims.get(ref, 0.0) for t, e in rivals.items()}
+            if best_match(sims, min_sim) == tid:
                 return True
         return False

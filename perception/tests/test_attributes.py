@@ -159,6 +159,59 @@ def test_a_broken_encoder_does_not_take_down_the_pipeline(bank, monkeypatch):
     assert bank.matches(1, ["red"], [], 0.6) is None
 
 
+# 2b. Reference matching --------------------------------------------------
+BGR = {"red": (0, 0, 255), "blue": (255, 0, 0)}
+
+
+def two_on_screen(left, right, ids=(1, 2)):
+    frame = np.zeros((40, 80, 3), np.uint8)
+    frame[:, :40], frame[:, 40:] = BGR[left], BGR[right]
+    dets = sv.Detections(
+        xyxy=np.array([[0.0, 0.0, 40.0, 40.0], [40.0, 0.0, 80.0, 40.0]], np.float32),
+        tracker_id=np.array(ids),
+        data={"class_name": np.array(["thing", "thing"], object)},
+    )
+    return frame, dets
+
+
+def remember(bank, colour):
+    crop = np.full((40, 40, 3), BGR[colour], np.uint8)
+    bank.set_references({"me": bank.encoder.encode_images([crop])[0]})
+
+
+def test_a_reference_follows_its_person_to_a_new_track_id(bank):
+    """ByteTrack hands out a fresh id after a long occlusion, and the old
+    id's entry is still cached. Ranked against that ghost of themselves, the
+    returning person never clears the margin: the follow-cam cannot reacquire
+    and "blur everyone except me" blurs me."""
+    remember(bank, "red")
+    frame, dets = frame_and_dets("red", track_id=7)
+    bank.update(frame, dets, now=0.0)
+    assert bank.ref_match(7, ["me"], 0.6) is True
+
+    frame, dets = frame_and_dets("red", track_id=12)
+    bank.update(frame, dets, now=5.0)
+    assert 7 in bank._cache  # still cached, which is the point
+    assert bank.ref_match(12, ["me"], 0.6) is True
+
+
+def test_two_lookalikes_on_screen_still_match_neither(bank):
+    """Scoping to the frame must not weaken the margin rule it serves."""
+    remember(bank, "red")
+    frame, dets = two_on_screen("red", "red")
+    bank.update(frame, dets, now=0.0)
+    assert bank.ref_match(1, ["me"], 0.6) is False
+    assert bank.ref_match(2, ["me"], 0.6) is False
+
+
+def test_the_reference_picks_its_person_out_of_a_crowd(bank):
+    remember(bank, "red")
+    frame, dets = two_on_screen("red", "blue")
+    bank.update(frame, dets, now=0.0)
+    assert bank.ref_match(1, ["me"], 0.6) is True
+    assert bank.ref_match(2, ["me"], 0.6) is False
+
+
 # 3. Through the running pipeline -----------------------------------------
 @pytest.fixture
 def rig(tmp_path):
