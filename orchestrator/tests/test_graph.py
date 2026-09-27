@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from agent.graph import build_graph, opening_messages
+from agent.graph import _standing_instruction, build_graph, opening_messages
 from config import CFG
 from tests.fake_model import calls, says
 from tools.registry import build_tools
@@ -166,6 +166,52 @@ async def test_a_standing_instruction_cannot_end_without_installing(
     assert state["ok"] is True
     assert state["outcome"] == "applied"
     assert state["behaviors"][0]["id"] == "b1"
+
+
+@pytest.mark.parametrize("question", [
+    "show me what's on the table",
+    "can you tell me if there's a cup here?",
+])
+async def test_a_question_that_uses_a_standing_word_keeps_its_answer(
+        perception, memory, monkeypatch, pipeline, question):
+    """"show" and "tell me if" are standing words only as commands. As a
+    question, the model's answer is the whole point and nothing should be
+    installed to satisfy a rule that does not apply."""
+    graph = build_graph(perception, memory)
+    model = says("A laptop and two cups.")
+    monkeypatch.setattr("agent.graph.chat_model", lambda: model)
+
+    state = await graph.ainvoke({
+        "messages": opening_messages(question, "user"),
+        "turn": "turn-1", "origin": "user",
+        "instruction": question, "image_urls": [],
+        "steps": 0, "started": 0.0, "require_installation": True,
+    }, {"recursion_limit": CFG.max_steps * 3 + 10})
+
+    assert state["reply"] == "A laptop and two cups."
+    assert state["ok"] is True
+    assert not state.get("enforcement_attempted")
+    assert pipeline.paths("POST") == []
+
+
+@pytest.mark.parametrize("instruction, standing", [
+    ("watch the walnut", True),
+    ("tell me if someone takes my phone", True),
+    ("can you watch my phone?", True),
+    ("show everyone", True),
+    ("count people crossing the door", True),
+    ('The operator attached "me.jpg".\n\nfollow me', True),
+    ("what's on the table?", False),
+    ("how many people are here", False),
+    ("is anyone near the duck?", False),
+    ("show me where the cup is", False),
+    ("can you tell me if there's a cup here?", False),
+    ('The operator attached "me.jpg".\n\nwhat is this?', False),
+])
+def test_standing_instructions_are_told_apart_from_questions(instruction, standing):
+    state = {"instruction": instruction, "origin": "user",
+             "require_installation": True, "pipeline_available": True}
+    assert _standing_instruction(state) is standing
 
 
 async def test_several_tool_calls_in_one_step_run_in_order(run, pipeline):

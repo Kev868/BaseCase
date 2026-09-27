@@ -65,8 +65,37 @@ class AgentState(TypedDict, total=False):
 
 _STANDING = re.compile(
     r"\b(watch|guard|monitor|track|follow|highlight|show|blur|hide|protect|"
-    r"alert|notify|tell me if|count .+ cross)\b", re.IGNORECASE,
+    r"alert|notify|tell me if|count .+ cross(?:es|ing|ed)?)\b", re.IGNORECASE,
 )
+
+# `_STANDING` only knows verbs, and questions use them too: "show me what's
+# on the table" asks for nothing to keep running. The two mistakes cost
+# different amounts. Calling a real standing instruction a question only
+# drops a backstop, because the model normally installs on its own. Calling a
+# question a standing instruction throws away a correct answer, or forces an
+# install nobody asked for. So when in doubt, it is a question.
+#
+# Anchored per line: an attached photo puts its note above the operator's
+# words, and the words are what get read.
+_QUESTION_START = re.compile(
+    r"^\s*(what|what's|whats|how|where|which|who|why|is|are|was|were|does|"
+    r"did|do you|can you see|could you see)\b", re.IGNORECASE | re.MULTILINE,
+)
+_ASKS_ABOUT_NOW = re.compile(
+    r"\b(show|tell) me (what|where|how|which|who|whether)\b", re.IGNORECASE,
+)
+#: Standing only as a command. Ending in "?" they are asking, not ordering:
+#: "can you tell me if there's a cup here?".
+_WEAK = {"show", "tell me if"}
+
+
+def _asks_for_standing(instruction: str) -> bool:
+    if _QUESTION_START.search(instruction) or _ASKS_ABOUT_NOW.search(instruction):
+        return False
+    verbs = {m.group(1).lower() for m in _STANDING.finditer(instruction)}
+    if not verbs:
+        return False
+    return not (instruction.rstrip().endswith("?") and verbs <= _WEAK)
 
 
 def _standing_instruction(state: AgentState) -> bool:
@@ -75,7 +104,7 @@ def _standing_instruction(state: AgentState) -> bool:
             and state.get("pipeline_available", True)
             and "registering it failed" not in instruction
             and state.get("origin") == "user"
-            and bool(_STANDING.search(instruction)))
+            and _asks_for_standing(instruction))
 
 
 def _text_of(message: AIMessage) -> str:
