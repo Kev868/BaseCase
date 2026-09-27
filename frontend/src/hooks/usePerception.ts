@@ -10,18 +10,45 @@ import type {
 import type { PerceptionClient, Reachability } from '../services/perception';
 import { ReconnectingSocket } from '../services/socket';
 
-/** WS /ws/state — one StateView per frame. Level-triggered: drops self-correct. */
+/** Longest a pipeline state change waits before it reaches the screen. */
+const STATE_FLUSH_MS = 100;
+
+/**
+ * WS /ws/state — one StateView per frame. Level-triggered: drops self-correct.
+ *
+ * The socket runs at the camera's frame rate, and each state update re-renders
+ * the whole console. Nothing on the page needs 30 Hz (the video is its own
+ * <img>), so only the newest state is kept, and React hears about it at most
+ * once every STATE_FLUSH_MS.
+ */
 export function usePerceptionState(perception: PerceptionClient, base: string): StateView | null {
   const [state, setState] = useState<StateView | null>(null);
 
   useEffect(() => {
     setState(null);
+    let latest: StateView | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const flush = () => {
+      timer = null;
+      setState(latest);
+    };
     const socket = new ReconnectingSocket<StateView>(perception.stateSocketUrl(), {
-      onMessage: setState,
-      onClose: () => setState(null),
+      onMessage: (next) => {
+        latest = next;
+        if (!timer) timer = setTimeout(flush, STATE_FLUSH_MS);
+      },
+      onClose: () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+        latest = null;
+        setState(null);
+      },
     });
     socket.connect();
-    return () => socket.close();
+    return () => {
+      socket.close();
+      if (timer) clearTimeout(timer);
+    };
   }, [perception, base]);
 
   return state;
