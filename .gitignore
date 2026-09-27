@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+# pytest --basetemp scratch directories from local runs
+.pytest-*/
 .ruff_cache/
 
 # Environments
@@ -12,6 +14,8 @@ venv/
 env/
 .env
 .env.*
+# The template is the one env file that belongs in the repo: the setup steps copy it.
+!.env.example
 
 # Model weights: large, and architecture- or version-specific. Every host
 # downloads or builds its own. TensorRT engines are tied to one GPU and one
