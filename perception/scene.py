@@ -22,7 +22,15 @@ built from both. The agent supplies the model.
 
 from __future__ import annotations
 
+import threading
+
 from contracts import SceneObject, TrackView
+
+#: The spare detector is one model object shared by every request, and using
+#: it is two steps: set its vocabulary, then infer. /probe, /describe and the
+#: queries each run in their own threadpool thread, and interleaved, one of
+#: them infers with the other's words and answers the wrong question.
+_SPARE = threading.Lock()
 
 #: An everyday vocabulary for the sweep, phrased the way SELECTORS.md says to
 #: phrase things: what a person would say, not a dataset label. Measured on
@@ -182,10 +190,11 @@ def sweep(registry, frame, candidates: list[str], shape) -> list[TrackView]:
             "no spare open-vocabulary detector to sweep with; add one to "
             "models.yaml with sweep: true")
     detector = registry.get(name)
-    detector.apply(detector.prepare(candidates))
-    # Forty classes at the tracking threshold hallucinates a whole room, so
-    # the sweep asks for a higher bar. Passed per call, not set globally.
-    dets = detector.infer(frame, conf=SWEEP_CONF)
+    with _SPARE:
+        detector.apply(detector.prepare(candidates))
+        # Forty classes at the tracking threshold hallucinates a whole room,
+        # so the sweep asks for a higher bar. Passed per call, not globally.
+        dets = detector.infer(frame, conf=SWEEP_CONF)
 
     h, w = shape[:2]
     names = dets.data.get("class_name")
@@ -228,11 +237,12 @@ def probe(registry, frame, phrases: list[str], shape) -> list[dict]:
     h, w = shape[:2]
     out = []
     for phrase in phrases:
-        detector.apply(detector.prepare([phrase]))
-        # Deliberately below the pipeline's own cutoff: a phrase scoring 0.10
-        # is failing differently from one scoring 0.00, and that difference is
-        # the whole point of looking.
-        dets = detector.infer(frame, conf=0.05)
+        with _SPARE:
+            detector.apply(detector.prepare([phrase]))
+            # Deliberately below the pipeline's own cutoff: a phrase scoring
+            # 0.10 is failing differently from one scoring 0.00, and that
+            # difference is the whole point of looking.
+            dets = detector.infer(frame, conf=0.05)
         confs = [float(c) for c in (dets.confidence if dets.confidence is not None else [])]
         areas = [float((b[2] - b[0]) * (b[3] - b[1]) / (w * h)) for b in dets.xyxy]
         out.append({

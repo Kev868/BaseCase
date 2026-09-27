@@ -550,13 +550,7 @@ async def _query_tracks(svc: Service, selector) -> list:
     if selector.ref_id and selector.ref_id not in set(state.refs):
         raise QueryUnavailable(f"unknown reference {selector.ref_id!r}")
 
-    world = svc.loop.world
-    active_prompts = set(world.prompt_union(world.behaviors.values())) if world else set()
-    active_attributes = set(svc.loop.shared.bank.phrases)
-    covered = (set(selector.prompts()) <= active_prompts
-               and set(selector.attribute_texts()) <= active_attributes)
-
-    if covered and svc.loop.last_tracks is not None:
+    if _covered(svc, selector) and svc.loop.last_tracks is not None:
         spec = BehaviorSpec(kind="highlight", subject=selector, notify=False)
         query = Behavior("__query__", spec)
         raw = svc.loop.last_tracks
@@ -593,8 +587,27 @@ async def _query_tracks(svc: Service, selector) -> list:
     return tracks
 
 
+def _covered(svc: Service, selector) -> bool:
+    """Is the live pipeline already detecting and scoring everything this
+    selector asks about? Then a query is a filter over the last frame, with no
+    model call at all."""
+    world = svc.loop.world
+    active_prompts = set(world.prompt_union(world.behaviors.values())) if world else set()
+    active_attributes = set(svc.loop.shared.bank.phrases)
+    return (set(selector.prompts()) <= active_prompts
+            and set(selector.attribute_texts()) <= active_attributes)
+
+
+#: Samples per window when counting needs the spare detector. Each is a full
+#: forward pass on the GPU the live loop is using, and sampling every
+#: published frame meant up to one per frame for a count whose median five
+#: already settle.
+SWEEP_SAMPLES = 5
+
+
 async def _sample(svc: Service, selector, window_s: float) -> list[int]:
     """Count complete selector matches over a window of published frames."""
+    gap = 0.02 if _covered(svc, selector) else window_s / SWEEP_SAMPLES
     deadline = time.time() + window_s
     counts, seen = [], None
     while time.time() < deadline:
@@ -602,7 +615,7 @@ async def _sample(svc: Service, selector, window_s: float) -> list[int]:
         if state is not None and state.ts != seen:
             seen = state.ts
             counts.append(len(await _query_tracks(svc, selector)))
-        await asyncio.sleep(0.02)
+        await asyncio.sleep(gap)
     return counts
 
 
