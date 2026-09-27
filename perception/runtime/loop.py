@@ -19,6 +19,7 @@ import logging
 import threading
 import time
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -37,6 +38,16 @@ from runtime.ops import Accepted, Applied, ModelLoaded, ModelLoading, Rejected
 from runtime.world import Shared, World
 
 log = logging.getLogger("perception.loop")
+
+#: Aux roles that return keypoints for the current frame, and so can run side
+#: by side. OCR is not one: it already owns a thread and never blocks.
+KEYPOINT_ROLES = ("pose", "hands", "wholebody")
+
+
+def _timed(fn, frame):
+    t0 = time.perf_counter()
+    result = fn(frame)
+    return result, time.perf_counter() - t0
 
 
 @dataclass
@@ -112,6 +123,8 @@ class InferenceLoop:
         self._started_at = time.time()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
+        #: Created the first time two keypoint models are wanted at once.
+        self._aux: ThreadPoolExecutor | None = None
 
     @property
     def behaviors(self) -> dict:
@@ -260,30 +273,51 @@ class InferenceLoop:
 
         A pipeline with no gesture behaviour pays nothing for one being
         possible. A failure here degrades that behaviour, never the frame.
+
+        Keypoint models are the expensive part, and back to back they add up:
+        three gesture behaviours at once took the loop from 30 to 15.9 fps.
+        When more than one is wanted they run side by side, so the frame pays
+        for the slowest rather than the sum. MediaPipe, ONNX Runtime and torch
+        all release the GIL while they work. Each still reads this frame and
+        the loop waits for all of them, so nothing downstream can tell.
         """
         wanted = self.world.roles_needed() if self.world else set()
         if not wanted or self.registry is None:
             return {}
-        out = {}
+        calls = {}
         for role in wanted:
             model = self.registry.try_get_active(role)
             if model is None:
                 continue
+            if role in KEYPOINT_ROLES:
+                # Keypoint models — (N, K, 3) in frame pixels, only K
+                # differs — so everything downstream is shared.
+                calls[role] = model.keypoints
+            elif role == "ocr":
+                # The one aux model too slow to run inline. It keeps its
+                # own thread; this hands over the newest frame and takes
+                # the most recent finished read, neither of which blocks.
+                calls[role] = model.latest
+
+        side_by_side = sum(role in KEYPOINT_ROLES for role in calls) > 1
+        pending = {role: self._aux_pool().submit(_timed, fn, frame)
+                   for role, fn in calls.items()
+                   if side_by_side and role in KEYPOINT_ROLES}
+        out = {}
+        for role, fn in calls.items():
             try:
-                t0 = time.perf_counter()
-                if role in ("pose", "hands", "wholebody"):
-                    # Keypoint models — (N, K, 3) in frame pixels, only K
-                    # differs — so everything downstream is shared.
-                    out[role] = model.keypoints(frame)
-                elif role == "ocr":
-                    # The one aux model too slow to run inline. It keeps its
-                    # own thread; this hands over the newest frame and takes
-                    # the most recent finished read, neither of which blocks.
-                    out[role] = model.latest(frame)
-                self.timings.mark(role, time.perf_counter() - t0)
+                job = pending.get(role)
+                out[role], seconds = job.result() if job else _timed(fn, frame)
+                self.timings.mark(role, seconds)
             except Exception:
                 log.exception("%s model failed", role)
         return out
+
+    def _aux_pool(self) -> ThreadPoolExecutor:
+        if self._aux is None:
+            self._aux = ThreadPoolExecutor(max_workers=len(KEYPOINT_ROLES),
+                                           thread_name_prefix="aux")
+        return self._aux
 
     def _run_behaviors(self, frame, tracks, now, active) -> tuple[list[Layer], object]:
         ctx = Frame(image=frame, tracks=tracks, bank=self.shared.bank, now=now,
@@ -404,6 +438,8 @@ class InferenceLoop:
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=5.0)
+        if self._aux is not None:
+            self._aux.shutdown(wait=False, cancel_futures=True)
 
     def run(self) -> None:
         log.info("frame loop started")

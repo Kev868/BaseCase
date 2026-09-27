@@ -188,3 +188,34 @@ def test_the_two_models_run_independently(rig):
     rig.frames(4, seen=boxes(PERSON))
     assert "open_palm" in rig.types()
     assert "hand_raised" not in rig.types()
+
+
+def test_two_keypoint_models_run_side_by_side(rig):
+    """A finger gesture and a body gesture at once. Run back to back the frame
+    paid for both models; side by side it pays for the slower one.
+
+    Each fake waits at a barrier the other has to reach. One after the other,
+    the first would time out, the barrier would break, and neither gesture
+    could fire — so this passes only if they genuinely overlap.
+    """
+    import threading
+
+    from tests.test_pose import body, with_pose
+
+    hands, pose = with_hands(rig), with_pose(rig)
+    a = guard(rig, gesture="open_palm", hold_frames=2)
+    b = guard(rig, gesture="hand_raised", hold_frames=2)
+    rig.settle()
+    # Armed only now. While the two behaviours were still being installed a
+    # frame could want one model alone, and a lone model waits out the barrier.
+    assert rig.state_of(a) != "PAUSED" and rig.state_of(b) != "PAUSED"
+    meet = threading.Barrier(2, timeout=2.0)
+    for model in (hands, pose):
+        alone = model.keypoints
+        model.keypoints = lambda frame, alone=alone: (meet.wait(), alone(frame))[1]
+
+    hands.seen = np.stack([hand()])
+    pose.people = np.stack([body("left")])
+    rig.frames(4, seen=boxes(PERSON))
+    assert {"open_palm", "hand_raised"} <= set(rig.types())
+    assert not meet.broken
