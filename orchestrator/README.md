@@ -309,4 +309,4 @@ recorded as proof that a target was acquired; probes provide measured evidence.
 
 `pan_to` currently guides a person turning the camera using arrows and measured
 odometry. It does not drive a physical motor. Available capabilities come from
-the perception registry; the root README includes future hardware/skill plans.
+the perception registry; `PROJECT.md` (Part VII) covers future hardware and skill plans.

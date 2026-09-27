@@ -66,5 +66,5 @@ turn deadline is 180 seconds; the browser allows 195 seconds. If you increase
 - `config/`, `styles/`, `utils/`: deployment settings, styles and small helpers.
 
 The available detector models and behavior kinds come from the running pipeline.
-The root README describes the broader design; unsupported capabilities such as
-keyboard guidance remain pipeline work, not a browser feature.
+`PROJECT.md` at the repo root describes the broader design. Capabilities such
+as keyboard guidance are pipeline work, not a browser feature.

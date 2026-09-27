@@ -137,8 +137,8 @@ From inside `perception/`.
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 
-# GPU host
-VIDEO_SOURCE=http://localhost:8003/stream .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001
+# GPU host. VIDEO_SOURCE is a webcam index, a file (loops) or a stream URL
+VIDEO_SOURCE=0 .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001
 
 # Mac (logic only; YOLOE runs on CPU here, see below)
 DEVICE=cpu IMGSZ=640 VIDEO_SOURCE=clips/duck.mp4 .venv/bin/uvicorn main:app --port 8001

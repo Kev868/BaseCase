@@ -159,7 +159,7 @@ the job is not.
 | Perception | 8001 | Python 3.14 | Every frame: detect, track, score attributes, run behaviours, actuate, render, emit events |
 | Orchestrator | 8000 | Python 3.14 | The agent loop, tools, phrase memory, event consumption |
 | Console | 3000 | React 19 / TS 5.9 | Enriched feed, chat, agent trace, events, behaviours, settings |
-| Camera service | 8003 | Python | Optional: frame source and, later, stepper control over serial |
+| Camera service | — | — | Not built. Perception opens the webcam itself; a separate frame source with stepper control over serial is future work |
 
 `linker/schemas.py` is the shared contract — pydantic v2 with
 `extra="forbid"`, imported by both Python services and mirrored by hand into
@@ -355,8 +355,8 @@ missed this frame does not jump when it returns.
 
 | suite | count |
 |---|---|
-| perception | **452 passed, 10 skipped** |
-| orchestrator | **149 passed** |
+| perception | **456 passed, 10 skipped** |
+| orchestrator | **163 passed** |
 
 No test opens a camera, loads real weights, or reaches a network. The rig drives
 a whole pipeline by hand with a fake capture, a fake detector and a hash-based
@@ -820,5 +820,5 @@ Web Speech API for dictation and TTS.
 **Contract:** `linker/schemas.py` — pydantic v2, `extra="forbid"`, mirrored into
 TypeScript.
 
-**Tests:** 452 + 10 skipped (perception), 149 (orchestrator). No test opens a
+**Tests:** 456 + 10 skipped (perception), 163 (orchestrator). No test opens a
 camera, loads real weights, or reaches the network.

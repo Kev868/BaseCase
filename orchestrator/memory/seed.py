@@ -1,7 +1,7 @@
 """The measurements this project already made, as the memory's starting state.
 
 Every number here was measured on real footage and is recorded in
-`documents/SELECTORS.md`, `PIPELINE-DIAGNOSIS.md` or `FOR-QINKAI.md`. Seeding
+`documents/SELECTORS.md` or the build notes under `docs/notes/`. Seeding
 them means the agent starts with the team's hard-won knowledge instead of
 rediscovering that "duck" finds nothing.
 
