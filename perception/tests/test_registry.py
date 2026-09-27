@@ -5,6 +5,7 @@ never refuse to boot because a model is missing, and it must never quietly hand
 the pipeline a model that cannot run.
 """
 
+import importlib.util
 import textwrap
 
 import pytest
@@ -14,6 +15,14 @@ from zoo.registry import (
     ModelUnavailableError,
     Registry,
     UnknownModelError,
+)
+
+#: For tests that build a real ultralytics entry. Without the package the
+#: registry correctly reports "ultralytics is not installed" before it looks at
+#: the engine file or the role, so what those tests assert cannot be reached.
+needs_ultralytics = pytest.mark.skipif(
+    importlib.util.find_spec("ultralytics") is None,
+    reason="ultralytics is not installed",
 )
 
 
@@ -138,6 +147,7 @@ def test_explicit_path_is_left_alone(tmp_path):
     assert e.weights_path == tmp_path / "a.pt"
 
 
+@needs_ultralytics
 def test_missing_engine_is_unavailable_rather_than_a_late_crash(tmp_path):
     e = Entry(name="trt", type="ultralytics_fixed", weights=str(tmp_path / "gone.engine"))
     e.check_available("cuda")

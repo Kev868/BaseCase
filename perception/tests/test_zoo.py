@@ -5,6 +5,7 @@ mostly about what happens when a model *cannot* run, because that is the case
 the laptop and the GPU host disagree on and both have to boot.
 """
 
+import importlib.util
 import textwrap
 
 import pytest
@@ -17,6 +18,14 @@ from zoo.registry import (
     UnknownModelError,
 )
 from zoo.roles import KINDS, ROLES, types_for
+
+#: For tests that build a real ultralytics entry. Without the package the
+#: registry correctly reports "ultralytics is not installed" before it looks at
+#: the engine file or the role, so what those tests assert cannot be reached.
+needs_ultralytics = pytest.mark.skipif(
+    importlib.util.find_spec("ultralytics") is None,
+    reason="ultralytics is not installed",
+)
 
 
 def write(tmp_path, body):
@@ -207,6 +216,7 @@ def test_only_detectors_report_a_vocabulary(reg):
     assert "open_vocab" not in by_name["hasher"]
 
 
+@needs_ultralytics
 def test_adding_a_model_is_only_a_config_edit(tmp_path):
     """The claim the zoo exists to make. A second pose model is one entry."""
     r = Registry.from_yaml(write(tmp_path, """

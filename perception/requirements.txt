@@ -30,5 +30,6 @@ easyocr
 
 # dev
 pytest
+pytest-timeout            # pytest.ini sets `timeout = 30`; without this it is ignored with a warning
 httpx
 python-multipart
