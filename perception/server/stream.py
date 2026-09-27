@@ -8,12 +8,18 @@ Composition and encoding happen once per frame and are shared by every viewer,
 so a second tab costs nothing. The feed is throttled well below the inference
 rate, because nobody can see 60fps and the loop should not pay for pixels
 nobody looks at.
+
+Neither happens on the event loop. Composing a blurred 720p frame and encoding
+it takes ~16 ms, and at 15 fps that held the loop a quarter of the time: every
+WebSocket push and API call waited behind the picture. Callers go through
+`asyncio.to_thread`, and a lock makes concurrent viewers share one encode.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 import time
 
 import cv2
@@ -34,30 +40,37 @@ class Streamer:
         self._seq = -1
         self._at = 0.0
         self.encoded = 0
+        #: Held across check-and-encode, so viewers arriving together wait for
+        #: one encode and share it rather than each doing their own.
+        self._lock = threading.Lock()
 
     def jpeg(self) -> bytes:
-        """Latest enriched frame, re-composed at most STREAM_FPS times a second."""
-        now = time.time()
-        view = self.loop.view
-        stale = view.seq != self._seq
-        due = now - self._at >= 1.0 / max(CFG.STREAM_FPS, 1.0)
-        if self._jpeg is not None and not (stale and due):
-            return self._jpeg
+        """Latest enriched frame, re-composed at most STREAM_FPS times a second.
 
-        frame = no_signal() if view.frame is None else view.frame.copy()
+        Blocking. From async code, call it through `asyncio.to_thread`.
+        """
+        with self._lock:
+            now = time.time()
+            view = self.loop.view
+            stale = view.seq != self._seq
+            due = now - self._at >= 1.0 / max(CFG.STREAM_FPS, 1.0)
+            if self._jpeg is not None and not (stale and due):
+                return self._jpeg
 
-        ok, buf = cv2.imencode(".jpg", compose(frame, view.layers),
-                               [cv2.IMWRITE_JPEG_QUALITY, CFG.JPEG_QUALITY])
-        if ok:
-            self._jpeg, self._seq, self._at = buf.tobytes(), view.seq, now
-            self.encoded += 1
-        return self._jpeg or b""
+            frame = no_signal() if view.frame is None else view.frame.copy()
+
+            ok, buf = cv2.imencode(".jpg", compose(frame, view.layers),
+                                   [cv2.IMWRITE_JPEG_QUALITY, CFG.JPEG_QUALITY])
+            if ok:
+                self._jpeg, self._seq, self._at = buf.tobytes(), view.seq, now
+                self.encoded += 1
+            return self._jpeg or b""
 
     def raw(self) -> bytes:
         """The frame with nothing drawn on it, for the agent's vision model.
 
         Overlays would be read as part of the scene, so `describe()` gets the
-        world, not our annotations of it.
+        world, not our annotations of it. Blocking, like `jpeg`.
         """
         frame = self.loop.view.frame
         if frame is None:
@@ -68,7 +81,7 @@ class Streamer:
     async def mjpeg(self):
         interval = 1.0 / max(CFG.STREAM_FPS, 1.0)
         while True:
-            data = self.jpeg()
+            data = await asyncio.to_thread(self.jpeg)
             if data:
                 yield (BOUNDARY + b"\r\nContent-Type: image/jpeg\r\nContent-Length: "
                        + str(len(data)).encode() + b"\r\n\r\n" + data + b"\r\n")

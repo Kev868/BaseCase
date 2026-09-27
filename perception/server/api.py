@@ -431,7 +431,7 @@ def create_app(svc: Service, *, run_threads: bool = True) -> FastAPI:
     async def snapshot():
         """The raw frame, for the agent's vision model. No overlays: they
         would be read as part of the scene."""
-        data = streamer.raw()
+        data = await asyncio.to_thread(streamer.raw)
         if not data:
             return JSONResponse(status_code=503, content={"detail": "no frame"})
         return Response(content=data, media_type="image/jpeg")
@@ -524,7 +524,8 @@ def create_app(svc: Service, *, run_threads: bool = True) -> FastAPI:
 
     @app.get("/frame.jpg")
     async def frame_jpg():
-        return Response(content=streamer.jpeg(), media_type="image/jpeg")
+        return Response(content=await asyncio.to_thread(streamer.jpeg),
+                        media_type="image/jpeg")
 
     @app.get("/", response_class=HTMLResponse)
     async def debug():
