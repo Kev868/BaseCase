@@ -125,14 +125,27 @@ def build_graph(perception: Perception, memory: PhraseMemory):
     async def ground(state: AgentState) -> dict[str, Any]:
         """Everything true right now, gathered before the model thinks.
 
-        One round trip each to two cheap endpoints, in exchange for the model
-        not having to ask what is running. Failures here are not fatal: a
-        pipeline that is down is something the agent should be told about, not
-        something that should stop the turn.
+        One round trip each to three cheap endpoints plus the phrase memory,
+        in exchange for the model not having to ask what is running. Failures
+        here are not fatal: a pipeline that is down is something the agent
+        should be told about, not something that should stop the turn.
         """
         turn = state["turn"]
-        listing = await perception.list_behaviors()
-        health = await perception.health()
+        wants_prior = bool(state.get("instruction")) and state.get("origin") == "user"
+
+        async def no_prior() -> None:
+            return None
+
+        # Independent reads, so they run at once. All of this sits before the
+        # model's first token on every turn, and the switch timer counts it;
+        # the prior is usually an embeddings round trip, the slowest of them.
+        listing, health, models, prior = await asyncio.gather(
+            perception.list_behaviors(),
+            perception.health(),
+            perception.models(),
+            asyncio.to_thread(memory.brief, state["instruction"])
+            if wants_prior else no_prior(),
+        )
 
         behaviors = listing.get("behaviors", []) if listing["ok"] else []
         health_data = {k: v for k, v in health.items() if k != "ok"} if health["ok"] else None
@@ -142,7 +155,6 @@ def build_graph(perception: Perception, memory: PhraseMemory):
         # are no gestures" read the same to the model otherwise, and the second
         # one is a claim we have not earned.
         gestures: list[str] | None = None
-        models = await perception.models()
         if models["ok"]:
             active = next((m for m in models.get("models", []) if m.get("active")), None)
             if active:
@@ -159,12 +171,10 @@ def build_graph(perception: Perception, memory: PhraseMemory):
 
         # The prior. Measured evidence for subjects like this one, which is
         # the thing that cannot fit in a system prompt and grows with use.
-        if state.get("instruction") and state.get("origin") == "user":
-            prior = await asyncio.to_thread(memory.brief, state["instruction"])
-            if prior:
-                lines.append(prior)
-                BUS.emit("thought", "recalled phrasings",
-                         prior.split("\n", 1)[-1][:300], turn=turn)
+        if prior:
+            lines.append(prior)
+            BUS.emit("thought", "recalled phrasings",
+                     prior.split("\n", 1)[-1][:300], turn=turn)
 
         BUS.emit("thought", "grounded",
                  f"{len(behaviors)} running", turn=turn, behaviors=behaviors)
