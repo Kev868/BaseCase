@@ -3,9 +3,9 @@
 The environment is set *before* `config` is imported, because `CFG` is frozen
 at import time. Three of these matter:
 
-* `OPENAI_API_KEY` is blanked. A developer's real key sitting in `.env` would
-  otherwise turn a unit test into a billed network call — the phrase memory
-  embeds on write, and `load_dotenv` would happily supply it.
+* Every provider's API key is blanked. A developer's real key sitting in
+  `.env` would otherwise turn a unit test into a billed network call — the
+  phrase memory embeds on write, and `load_dotenv` would happily supply it.
 * `ORCH_EMBED_MODEL` is blanked, so the memory runs full-text only. That is
   the offline mode, and it is the one CI can actually run.
 * `PERCEPTION_BASE` points at a host that does not exist, so anything that
@@ -22,6 +22,9 @@ _TMP = tempfile.mkdtemp(prefix="orchestrator-tests-")
 
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["ANTHROPIC_API_KEY"] = ""
+os.environ["XAI_API_KEY"] = ""
+# Whichever provider a developer's .env picks, the tests run the same way.
+os.environ["ORCH_PROVIDER"] = "openai"
 os.environ["ORCH_EMBED_MODEL"] = ""
 os.environ["ORCH_MEMORY_DIR"] = os.path.join(_TMP, "lancedb")
 os.environ["PERCEPTION_BASE"] = "http://perception.test"

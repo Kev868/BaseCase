@@ -129,13 +129,17 @@ class PhraseMemory:
             self._table = None
 
     def _make_embedder(self):
-        """None means full-text search, which needs no network."""
-        if not self.embed_model or not CFG.api_key:
+        """None means full-text search, which needs no network.
+
+        The embedding models are OpenAI's, so this takes the OpenAI key even
+        when the agent runs on Grok: the provider's key would be refused.
+        """
+        if not self.embed_model or not CFG.openai_key:
             return None
         try:
             from langchain_openai import OpenAIEmbeddings
             return OpenAIEmbeddings(
-                model=self.embed_model, api_key=CFG.api_key,
+                model=self.embed_model, api_key=CFG.openai_key,
                 request_timeout=CFG.tool_timeout_s, max_retries=1,
             )
         except Exception as exc:                        # noqa: BLE001

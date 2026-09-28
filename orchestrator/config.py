@@ -36,14 +36,38 @@ def _i(key: str, default: int) -> int:
         return default
 
 
+#: What each provider runs when ORCH_MODEL is blank.
+DEFAULT_MODELS = {"openai": "gpt-6-astra", "xai": "grok-4.7"}
+#: Where each provider's key is read from.
+KEY_ENV = {"openai": "OPENAI_API_KEY", "anthropic": "ANTHROPIC_API_KEY",
+           "xai": "XAI_API_KEY"}
+#: xAI serves the OpenAI protocol, Responses API included, at its own address.
+XAI_BASE_URL = "https://api.x.ai/v1"
+
+_PROVIDER = _s("ORCH_PROVIDER", "openai")
+_MODEL = _s("ORCH_MODEL", "") or DEFAULT_MODELS.get(_PROVIDER, "gpt-6-astra")
+
+
+def provider_of(model: str) -> str:
+    """Which provider serves a model, from its name. For picking a model
+    per run, as the evals do, without editing .env."""
+    if model.startswith("grok"):
+        return "xai"
+    if model.startswith("claude"):
+        return "anthropic"
+    return "openai"
+
+
 @dataclass(frozen=True)
 class Config:
     # 1. Model -----------------------------------------------------------
-    provider: str = _s("ORCH_PROVIDER", "openai")
-    model: str = _s("ORCH_MODEL", "gpt-6-astra")
+    #: openai | xai | anthropic
+    provider: str = _PROVIDER
+    model: str = _MODEL
     #: Must accept images. Blank reuses `model`.
-    vision_model: str = _s("ORCH_VISION_MODEL", "") or _s("ORCH_MODEL", "gpt-6-astra")
+    vision_model: str = _s("ORCH_VISION_MODEL", "") or _MODEL
     #: Blank disables vector search; the memory falls back to full-text.
+    #: Always an OpenAI model, whichever provider runs the agent.
     embed_model: str = _s("ORCH_EMBED_MODEL", "text-embedding-3-small")
 
     # 2. Services --------------------------------------------------------
@@ -73,8 +97,18 @@ class Config:
 
     @property
     def api_key(self) -> str:
-        env = "ANTHROPIC_API_KEY" if self.provider == "anthropic" else "OPENAI_API_KEY"
-        return os.environ.get(env, "")
+        """The key for whichever provider runs the agent."""
+        return key_for(self.provider)
+
+    @property
+    def openai_key(self) -> str:
+        """For the phrase memory's embeddings, which are OpenAI's even when
+        the agent runs on another provider."""
+        return os.environ.get("OPENAI_API_KEY", "")
+
+
+def key_for(provider: str) -> str:
+    return os.environ.get(KEY_ENV.get(provider, "OPENAI_API_KEY"), "")
 
 
 CFG = Config()
