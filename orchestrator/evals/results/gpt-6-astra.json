@@ -1,0 +1,1968 @@
+{
+  "date": "2026-09-27",
+  "summary": {
+    "model": "gpt-6-astra",
+    "passed": 48,
+    "runs": 48,
+    "wrong": 0,
+    "timeouts": 0,
+    "slowest_turn_s": 8.21,
+    "median_turn_s": 4.8,
+    "p90_turn_s": 6.7,
+    "refusals": 0,
+    "self_corrected": 0,
+    "network_retries": 0
+  },
+  "limits": {
+    "ORCH_TURN_TIMEOUT_S": "180",
+    "ORCH_MAX_STEPS": "10",
+    "ORCH_LLM_TIMEOUT_S": "60"
+  },
+  "results": [
+    {
+      "id": "highlight-everyone",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.85
+      ],
+      "wall_seconds": 5.99,
+      "replies": [
+        "Highlighting is on for everyone in view."
+      ],
+      "installed": [
+        {
+          "kind": "highlight",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Everyone"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "track-pencil",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.08
+      ],
+      "wall_seconds": 6.16,
+      "replies": [
+        "Pencil tracking is running, looking for a match."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "pencil",
+              "writing pencil",
+              "wooden pencil"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "pencil"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "follow-dog",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.95
+      ],
+      "wall_seconds": 5.96,
+      "replies": [
+        "Follow mode is on; the camera is looking for the dog."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "dog",
+              "pet dog",
+              "small dog"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "ref",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "dog"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "blur-faces",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.58
+      ],
+      "wall_seconds": 4.58,
+      "replies": [
+        "Face blurring is enabled for everyone."
+      ],
+      "installed": [
+        {
+          "kind": "privacy",
+          "subject": {
+            "detect": [
+              "face",
+              "person's face",
+              "human face"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "mode": "blur"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Face privacy"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "count-crossing",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.16
+      ],
+      "wall_seconds": 4.16,
+      "replies": [
+        "Counting people crossing the centre line\u2014align it with the doorway."
+      ],
+      "installed": [
+        {
+          "kind": "count_line",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "line": [
+              [
+                0.5,
+                0
+              ],
+              [
+                0.5,
+                1
+              ]
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Doorway crossings"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "raise-hand",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.51
+      ],
+      "wall_seconds": 4.51,
+      "replies": [
+        "I\u2019m watching for raised hands and will alert you when someone raises one."
+      ],
+      "installed": [
+        {
+          "kind": "pose_trigger",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "gesture": "hand_raised"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Hand raised"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "follow-red-shirt",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.1
+      ],
+      "wall_seconds": 5.1,
+      "replies": [
+        "Follow mode is on, looking for the person in the red shirt."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [
+              "a person wearing a red shirt"
+            ],
+            "exclude": [
+              "a person wearing a shirt that is not red"
+            ],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Person in red shirt"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "follow-red-shoes",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.2
+      ],
+      "wall_seconds": 5.2,
+      "replies": [
+        "The camera is looking for the person in red shoes and will follow them when detected."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "person",
+              "red shoe",
+              "red sneaker"
+            ],
+            "include": [],
+            "exclude": [],
+            "relate": {
+              "contains": "red shoe",
+              "lower_frac": 0.4
+            },
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "Person in red shoes"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "highlight-red",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.71
+      ],
+      "wall_seconds": 4.71,
+      "replies": [
+        "Red-object highlighting is now running."
+      ],
+      "installed": [
+        {
+          "kind": "highlight",
+          "subject": {
+            "detect": [
+              "red object",
+              "red item",
+              "red clothing"
+            ],
+            "include": [
+              "a red object"
+            ],
+            "exclude": [
+              "a non-red object"
+            ],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "color": "#FF0000",
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Anything red"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "blur-except-me",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.52
+      ],
+      "wall_seconds": 4.52,
+      "replies": [
+        "Face privacy is running, set to blur everyone\u2019s face except yours."
+      ],
+      "installed": [
+        {
+          "kind": "privacy",
+          "subject": {
+            "detect": [
+              "face",
+              "person's face"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "mode": "blur",
+            "keep_ref": "r1"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Faces except yours"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "watch-phone",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.29
+      ],
+      "wall_seconds": 6.29,
+      "replies": [
+        "The phone watch is running; once it finds your phone, I\u2019ll alert you if it disappears for two seconds."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "mobile phone",
+              "smartphone",
+              "cell phone"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Your phone"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "watch-duck-near",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.7
+      ],
+      "wall_seconds": 5.7,
+      "replies": [
+        "The proximity watch is running; once the yellow duck is located, I\u2019ll alert you if anyone gets close."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "yellow rubber duck",
+              "rubber duck",
+              "yellow duck",
+              "duck toy"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "near",
+                "other": {
+                  "detect": [
+                    "person"
+                  ],
+                  "pick": "all"
+                },
+                "margin": 0.1
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Yellow duck proximity"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "watch-duck-authorised",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        7.48
+      ],
+      "wall_seconds": 7.49,
+      "replies": [
+        "The duck watch is running; I\u2019ll alert you if anyone approaches, except people wearing black jackets."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "yellow rubber duck",
+              "rubber duck",
+              "yellow duck",
+              "duck toy"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "near",
+                "other": {
+                  "detect": [
+                    "person"
+                  ],
+                  "include": [
+                    "a person not wearing a black jacket"
+                  ],
+                  "exclude": [
+                    "a person wearing a black jacket"
+                  ],
+                  "pick": "all"
+                },
+                "margin": 0.1
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Yellow duck guard"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "guard-table",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.52
+      ],
+      "wall_seconds": 6.52,
+      "replies": [
+        "Three guards are running; once each item is visible and armed, I\u2019ll alert you if it disappears for two seconds."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "laptop computer",
+              "open laptop",
+              "laptop"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "laptop"
+          },
+          "notify": true
+        },
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "mobile phone",
+              "smartphone",
+              "cell phone"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "phone"
+          },
+          "notify": true
+        },
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "wallet",
+              "folded wallet",
+              "card wallet"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "wallet"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "track-two",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.25
+      ],
+      "wall_seconds": 5.25,
+      "replies": [
+        "Tracking is enabled for both the pencil and the eraser, ready to follow them when detected."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "pencil",
+              "writing pencil",
+              "wooden pencil"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "pencil"
+          },
+          "notify": true
+        },
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "eraser",
+              "rubber eraser",
+              "pencil eraser"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "eraser"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "retarget",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.32,
+        6.8
+      ],
+      "wall_seconds": 11.12,
+      "replies": [
+        "Pencil tracking is on; I\u2019m looking for it now.",
+        "Switched from pencil tracking to eraser tracking; I\u2019m looking for it now."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "eraser",
+              "rubber eraser",
+              "pencil eraser"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "eraser"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "stop-everything",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.84,
+        5.53
+      ],
+      "wall_seconds": 9.38,
+      "replies": [
+        "Highlighting everyone the camera detects.",
+        "Everything is stopped."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "model-swap",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.44
+      ],
+      "wall_seconds": 4.44,
+      "replies": [
+        "Switched to the COCO detector."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "question-table",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.47
+      ],
+      "wall_seconds": 4.47,
+      "replies": [
+        "I can see a laptop in the centre, a mug on the right, and a notebook at the lower left."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "question-show-me",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        7.3
+      ],
+      "wall_seconds": 7.3,
+      "replies": [
+        "I can see a laptop in the centre, a mug on the right, and a notebook at the lower left."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "question-count",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.32
+      ],
+      "wall_seconds": 4.32,
+      "replies": [
+        "I can see 3 people in the camera\u2019s view."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "question-near",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        8.21
+      ],
+      "wall_seconds": 8.21,
+      "replies": [
+        "I can see a person and a laptop, but I can\u2019t confirm whether they\u2019re close together."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "unsupported-keyboard",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.42
+      ],
+      "wall_seconds": 4.42,
+      "replies": [
+        "Live keyboard guidance isn\u2019t available yet. To type **hello**, press **H \u2192 E \u2192 L \u2192 L \u2192 O**, without holding Shift."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "highlight-everyone",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.7
+      ],
+      "wall_seconds": 3.7,
+      "replies": [
+        "Highlighting everyone the camera detects."
+      ],
+      "installed": [
+        {
+          "kind": "highlight",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Everyone"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "track-pencil",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.74
+      ],
+      "wall_seconds": 4.74,
+      "replies": [
+        "Pencil tracking is on and looking for a match."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "pencil",
+              "wooden pencil",
+              "writing pencil"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "pencil"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "follow-dog",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.4
+      ],
+      "wall_seconds": 4.4,
+      "replies": [
+        "Dog-following is on; the camera is looking for the dog."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "dog",
+              "pet dog",
+              "small dog"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "dog"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "blur-faces",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.41
+      ],
+      "wall_seconds": 4.41,
+      "replies": [
+        "Face blurring is now running for everyone the camera detects."
+      ],
+      "installed": [
+        {
+          "kind": "privacy",
+          "subject": {
+            "detect": [
+              "face",
+              "person's face",
+              "human face"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "mode": "blur"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Face privacy"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "count-crossing",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.96
+      ],
+      "wall_seconds": 3.96,
+      "replies": [
+        "Counting people crossing the centre line\u2014align it with the doorway."
+      ],
+      "installed": [
+        {
+          "kind": "count_line",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "line": [
+              [
+                0.5,
+                0
+              ],
+              [
+                0.5,
+                1
+              ]
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Doorway crossings"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "raise-hand",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.59
+      ],
+      "wall_seconds": 4.59,
+      "replies": [
+        "I\u2019ll alert you when someone raises their hand."
+      ],
+      "installed": [
+        {
+          "kind": "pose_trigger",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "gesture": "hand_raised"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Raised hand alerts"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "follow-red-shirt",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.04
+      ],
+      "wall_seconds": 6.04,
+      "replies": [
+        "Follow mode is running, looking for the person in the red shirt."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [
+              "a person wearing a red shirt"
+            ],
+            "exclude": [
+              "a person wearing a shirt that is not red"
+            ],
+            "pick": "ref",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "Person in red shirt"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "follow-red-shoes",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.44
+      ],
+      "wall_seconds": 5.44,
+      "replies": [
+        "Follow mode is on, looking for the person in red shoes."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "person",
+              "red shoe",
+              "red footwear"
+            ],
+            "include": [],
+            "exclude": [],
+            "relate": {
+              "contains": "red shoe",
+              "lower_frac": 0.4
+            },
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Person in red shoes"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "highlight-red",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.92
+      ],
+      "wall_seconds": 4.92,
+      "replies": [
+        "Red-object highlighting is on."
+      ],
+      "installed": [
+        {
+          "kind": "highlight",
+          "subject": {
+            "detect": [
+              "red object",
+              "red item"
+            ],
+            "include": [
+              "a red object"
+            ],
+            "exclude": [
+              "an object that is not red"
+            ],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "color": "#FF0000",
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Anything red"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "blur-except-me",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.54
+      ],
+      "wall_seconds": 4.54,
+      "replies": [
+        "Face blurring is running, with your reference set as the exception."
+      ],
+      "installed": [
+        {
+          "kind": "privacy",
+          "subject": {
+            "detect": [
+              "face",
+              "person's face"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "mode": "blur",
+            "keep_ref": "r1"
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Face privacy \u2014 except you"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "watch-phone",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.68
+      ],
+      "wall_seconds": 4.68,
+      "replies": [
+        "The phone watch is running; once it spots your phone, I\u2019ll alert you if it disappears for two seconds."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "mobile phone",
+              "smartphone",
+              "cell phone"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Your phone"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "watch-duck-near",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.48
+      ],
+      "wall_seconds": 5.48,
+      "replies": [
+        "Duck watch is running; once it locates the yellow duck, I\u2019ll alert you if anyone gets close."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "yellow rubber duck",
+              "rubber duck",
+              "yellow duck",
+              "duck toy"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "near",
+                "other": {
+                  "detect": [
+                    "person"
+                  ],
+                  "pick": "all"
+                },
+                "margin": 0.1
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Yellow duck proximity"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "watch-duck-authorised",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.5
+      ],
+      "wall_seconds": 6.5,
+      "replies": [
+        "The duck watch is running; I\u2019ll alert you when someone approaches, except people wearing black jackets."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "yellow rubber duck",
+              "rubber duck",
+              "yellow duck",
+              "duck toy"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "near",
+                "other": {
+                  "detect": [
+                    "person"
+                  ],
+                  "include": [
+                    "a person not wearing a black jacket"
+                  ],
+                  "exclude": [
+                    "a person wearing a black jacket"
+                  ],
+                  "pick": "all"
+                },
+                "margin": 0.1
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Yellow duck guard"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "guard-table",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        7.38
+      ],
+      "wall_seconds": 7.38,
+      "replies": [
+        "The three guards are running; once each item is acquired, I\u2019ll alert you if it disappears for two seconds."
+      ],
+      "installed": [
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "laptop computer",
+              "laptop",
+              "notebook computer"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Laptop"
+          },
+          "notify": true
+        },
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "mobile phone",
+              "smartphone",
+              "cell phone"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Phone"
+          },
+          "notify": true
+        },
+        {
+          "kind": "watch",
+          "subject": {
+            "detect": [
+              "wallet",
+              "folded wallet",
+              "billfold"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "triggers": [
+              {
+                "type": "missing",
+                "after_s": 2
+              }
+            ]
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Wallet"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "track-two",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.3
+      ],
+      "wall_seconds": 5.3,
+      "replies": [
+        "Tracking is enabled for both the pencil and the eraser; the camera is looking for them."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "pencil",
+              "wooden pencil",
+              "writing pencil"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "pencil"
+          },
+          "notify": true
+        },
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "eraser",
+              "rubber eraser",
+              "pencil eraser"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": true,
+            "boxes": true,
+            "label": "eraser"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "retarget",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.8,
+        5.22
+      ],
+      "wall_seconds": 9.02,
+      "replies": [
+        "Pencil tracking is on; I\u2019m looking for it now.",
+        "Switched from pencil tracking to eraser tracking; I\u2019m looking for it now."
+      ],
+      "installed": [
+        {
+          "kind": "track",
+          "subject": {
+            "detect": [
+              "eraser",
+              "rubber eraser",
+              "pencil eraser"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "largest",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {},
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "eraser"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "stop-everything",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.11,
+        3.04
+      ],
+      "wall_seconds": 7.16,
+      "replies": [
+        "Highlighting everyone in view.",
+        "Everything is stopped."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "model-swap",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        4.69
+      ],
+      "wall_seconds": 4.69,
+      "replies": [
+        "Switched to the COCO detector."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "question-table",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.35
+      ],
+      "wall_seconds": 3.35,
+      "replies": [
+        "I can see a laptop in the centre, a mug on the right, and a notebook at the lower left."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "question-show-me",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        3.24
+      ],
+      "wall_seconds": 3.24,
+      "replies": [
+        "I can see a laptop in the centre, a mug on the right, and a notebook at the lower left."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "question-count",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        5.01
+      ],
+      "wall_seconds": 5.01,
+      "replies": [
+        "I can see 3 people in the camera\u2019s view."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "question-near",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.3
+      ],
+      "wall_seconds": 6.3,
+      "replies": [
+        "I can detect a person and a laptop, but I can\u2019t confirm whether they\u2019re near each other."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "unsupported-keyboard",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        2.04
+      ],
+      "wall_seconds": 2.04,
+      "replies": [
+        "Live keyboard guidance isn\u2019t available yet. To type \u201chello,\u201d press H, E, L, L, then O."
+      ],
+      "installed": [],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    },
+    {
+      "id": "pan-left",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.25
+      ],
+      "wall_seconds": 6.33,
+      "replies": [
+        "Turn guidance is running\u2014follow the on-screen arrow to rotate the camera 45\u00b0 left."
+      ],
+      "installed": [
+        {
+          "kind": "pan_to",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "deg": -45
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Turn 45\u00b0 left"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 0,
+      "tries": 1
+    },
+    {
+      "id": "pan-left",
+      "passed": true,
+      "problems": [],
+      "seconds": [
+        6.0
+      ],
+      "wall_seconds": 6.01,
+      "replies": [
+        "Follow the on-screen arrow to turn the camera 45\u00b0 left."
+      ],
+      "installed": [
+        {
+          "kind": "pan_to",
+          "subject": {
+            "detect": [
+              "person"
+            ],
+            "include": [],
+            "exclude": [],
+            "pick": "all",
+            "min_score": 0.75,
+            "ref_min_sim": 0.75
+          },
+          "params": {
+            "deg": -45
+          },
+          "render": {
+            "mask": true,
+            "trail": false,
+            "boxes": true,
+            "label": "Turn 45\u00b0 left"
+          },
+          "notify": true
+        }
+      ],
+      "probes": 0,
+      "refusals": 0,
+      "attempt": 1,
+      "tries": 1
+    }
+  ]
+}

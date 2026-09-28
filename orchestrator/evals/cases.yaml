@@ -1,0 +1,128 @@
+# What the agent is scored on: one sentence (or a short conversation) in, and
+# what should be running afterwards. Each case runs the real agent against a
+# stand-in pipeline (evals/pipeline.py), so the score is about turning English
+# into the right program, not about what the camera happens to see.
+#
+#   say      the operator's words; a list is a conversation, in order
+#   scene    probe scores for this case, on top of pipeline.DEFAULT_SCENE
+#   photo    attach evals/fixtures/operator.jpg to the first turn
+#   count    how many people the pipeline reports for count and look queries
+#   expect   what must be true at the end; every key must hold (see run.py)
+
+# 1. One subject -------------------------------------------------------------
+
+- id: highlight-everyone
+  say: Highlight everyone
+  expect: {kind: highlight, detect: [person, people, human]}
+
+- id: track-pencil
+  say: Track the pencil
+  scene: {pencil: 0.41}
+  expect: {kind: track, detect: [pencil]}
+
+- id: follow-dog
+  say: Follow the dog
+  scene: {dog: 0.83}
+  expect: {kind: track, detect: [dog]}
+
+- id: blur-faces
+  say: Blur everyone's face
+  expect: {kind: privacy, detect: [face]}
+
+- id: count-crossing
+  say: Count people crossing the doorway
+  expect: {kind: count_line, detect: [person, people]}
+
+- id: raise-hand
+  say: Tell me when someone raises their hand
+  expect: {kind: pose_trigger, params: {gesture: hand_raised}}
+
+- id: pan-left
+  say: Turn 45 degrees to the left
+  expect: {kind: pan_to, deg: -45}
+
+# 2. Telling one thing from another -----------------------------------------
+
+- id: follow-red-shirt
+  say: Follow the person in the red shirt
+  expect: {kind: track, detect: [person], mentions: [red]}
+
+- id: follow-red-shoes
+  say: Follow the person in red shoes
+  scene: {shoe: 0.52}
+  expect: {kind: track, detect: [person], mentions: [shoe]}
+
+- id: highlight-red
+  say: Highlight anything red
+  expect: {kind: highlight, mentions: [red]}
+
+- id: blur-except-me
+  say: Blur everyone's face except mine
+  photo: true
+  expect: {kind: privacy, params: {keep_ref: r1}}
+
+# 3. Watching, with triggers --------------------------------------------------
+
+- id: watch-phone
+  say: Watch my phone and tell me if it disappears
+  expect: {kind: watch, detect: [phone], trigger: missing}
+
+- id: watch-duck-near
+  say: Watch the yellow duck and tell me if anyone gets close
+  scene: {yellow duck: 0.24, rubber duck: 0.19}
+  expect: {kind: watch, detect: [duck], trigger: near}
+
+- id: watch-duck-authorised
+  say: Watch the yellow duck and tell me if anyone approaches, but people in black jackets are allowed
+  scene: {yellow duck: 0.24, rubber duck: 0.19}
+  expect: {kind: watch, detect: [duck], trigger: near, excludes: [black]}
+
+- id: guard-table
+  say: Guard the laptop, the phone and the wallet. Tell me if any of them goes missing.
+  scene: {wallet: 0.45}
+  expect: {kind: watch, detect_all: [laptop, phone, wallet], trigger: missing}
+
+# 4. More than one, and changing your mind -------------------------------------
+
+- id: track-two
+  say: Track the pencil and the eraser
+  scene: {pencil: 0.41, eraser: 0.37}
+  expect: {kind: track, detect_all: [pencil, eraser], total: 2}
+
+- id: retarget
+  say: [Track the pencil, Now track the eraser instead]
+  scene: {pencil: 0.41, eraser: 0.37}
+  expect: {kind: track, detect: [eraser], absent: [pencil], total: 1}
+
+- id: stop-everything
+  say: [Highlight everyone, Stop everything]
+  expect: {total: 0}
+
+- id: model-swap
+  say: Switch your model to the COCO detector
+  expect: {model: coco}
+
+# 5. Questions, which must not install anything --------------------------------
+
+- id: question-table
+  say: What's on the table right now?
+  expect: {nothing: true, reply: [laptop, mug, notebook]}
+
+- id: question-show-me
+  say: Show me what's on the desk
+  expect: {nothing: true, reply: [laptop, mug, notebook]}
+
+- id: question-count
+  say: How many people are in the room?
+  count: 3
+  expect: {nothing: true, reply: ["3", three]}
+
+- id: question-near
+  say: Is anyone near the laptop right now?
+  expect: {nothing: true}
+
+# 6. Something it cannot do -------------------------------------------------
+
+- id: unsupported-keyboard
+  say: Guide me to type hello on the keyboard
+  expect: {nothing: true}
