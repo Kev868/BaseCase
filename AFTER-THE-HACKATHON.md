@@ -96,5 +96,37 @@ Both fixes have tests that fail on the old code.
 - Two tests failed instead of skipping when an optional package wasn't
   installed. Fixed, along with a missing test dependency.
 
-Tests went from 452 to 456 in perception and from 149 to 163 in the
+### Grok, and measuring the agent
+
+The agent used to be OpenAI-only. It now runs on Grok too: set
+`ORCH_PROVIDER=xai` and an xAI key, and it's the same code pointed at xAI's
+API, since xAI speaks the same protocol.
+
+That raised the obvious question of which model is actually better at this
+job, so I built an eval ([orchestrator/evals/](orchestrator/evals/)). It's 24
+instructions covering everything the demo does, including questions that
+shouldn't set anything up and one thing it can't do. Each one runs through the
+real agent against a stand-in pipeline, and gets checked on whether the right
+program ended up running. Two runs each:
+
+| Model | Got it right | Typical time per instruction |
+|---|---|---|
+| GPT-6-Astra (what we demoed on) | 48/48 | 4.8 s |
+| Grok 4.7 | 48/48 | 9.2 s |
+| Grok 4.20, non-reasoning | 47/48 | 1.9 s |
+
+Both reasoning models were perfect, so the difference is speed. The fast
+Grok was about 2.5 times quicker than GPT, but once it replied "Cleared all
+behaviors" without actually clearing anything. Full breakdown in
+[RESULTS.md](orchestrator/evals/RESULTS.md).
+
+Building it also caught mistakes in the eval itself. My first scorer failed
+GPT for tracking a "pencil eraser" after being told to switch from the pencil
+to the eraser (it's still an eraser), and the stand-in pipeline made models
+that waited for the camera to finish turning look slow. Both are fixed, with
+tests. The honest caveat: this measures turning English into the right
+program, not whether the camera then sees the thing. That part is tested
+separately, in perception.
+
+Tests went from 452 to 456 in perception and from 149 to 187 in the
 orchestrator, all passing.

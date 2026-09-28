@@ -356,7 +356,7 @@ missed this frame does not jump when it returns.
 | suite | count |
 |---|---|
 | perception | **456 passed, 10 skipped** |
-| orchestrator | **163 passed** |
+| orchestrator | **187 passed** |
 
 No test opens a camera, loads real weights, or reaches a network. The rig drives
 a whole pipeline by hand with a fake capture, a fake detector and a hash-based
@@ -820,5 +820,5 @@ Web Speech API for dictation and TTS.
 **Contract:** `linker/schemas.py` — pydantic v2, `extra="forbid"`, mirrored into
 TypeScript.
 
-**Tests:** 456 + 10 skipped (perception), 163 (orchestrator). No test opens a
+**Tests:** 456 + 10 skipped (perception), 187 (orchestrator). No test opens a
 camera, loads real weights, or reaches the network.

@@ -260,12 +260,18 @@ it, and race to an empty pipeline.
 ```bash
 cd orchestrator
 python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Windows
-cp .env.example .env            # then paste the OpenAI key
+cp .env.example .env            # then paste your API key
 python main.py                  # :8000
 ```
 
 The key lives here, not in the browser. `frontend/.env.local` holds service
 URLs only.
+
+The agent runs on OpenAI by default. For Grok, set `ORCH_PROVIDER=xai` and
+`XAI_API_KEY` in `.env`; a blank `ORCH_MODEL` then means `grok-4.7`. Nothing
+else changes: xAI serves the same protocol, so it is the same client pointed
+at a different address (`agent/llm.py`). How the two compare on this agent's
+job is in [evals/](evals/).
 
 `documents/SELECTORS.md` and `documents/BEHAVIORS.md` are required runtime
 assets: the system prompt is built from them. They are deliberately not ignored,
@@ -283,6 +289,7 @@ orchestrator/
   memory/      store.py seed.py
   events/      watcher.py
   app/         api.py trace.py
+  evals/       cases.yaml run.py pipeline.py  <- scores models on the agent's job
 ```
 
 ## Integration notes

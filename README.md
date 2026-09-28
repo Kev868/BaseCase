@@ -87,13 +87,18 @@ Design points worth reading the code for:
   gave 10 fps on a Logitech C920; resolution first gave 30.5 fps. DirectShow
   opens the camera in 2.35 s where OpenCV's Windows default (MSMF) took 32.9 s.
 
+- **The agent itself.** An eval runs 24 instructions through the real agent
+  and checks what ends up running. Over two runs each, GPT-6-Astra and Grok 4.7
+  both scored 48/48 (median 4.8 s and 9.2 s a turn), and a fast non-reasoning
+  Grok scored 47/48 in 1.9 s. See [orchestrator/evals/](orchestrator/evals/).
+
 The full story, including the bug that looked like ten bugs, is in
 [PROJECT.md](PROJECT.md).
 
 ## Run it
 
 Needs Python 3.14 (what it was built and tested on), Node 20.19+, a webcam and
-an OpenAI API key. An NVIDIA GPU is recommended; CPU works but is slow. The
+an OpenAI or xAI (Grok) API key. An NVIDIA GPU is recommended; CPU works but is slow. The
 first perception start downloads about 1.2 GB of weights.
 
 ```bash
@@ -107,7 +112,7 @@ python -m venv .venv
 cd orchestrator
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp .env.example .env                          # then set OPENAI_API_KEY
+cp .env.example .env                          # then set OPENAI_API_KEY, or XAI_API_KEY for Grok
 .venv/bin/python main.py
 
 # 3. Console, :3000
@@ -123,7 +128,7 @@ Open <http://localhost:3000>. Perception also serves a bare debug page at
 
 ```bash
 cd perception   && .venv/bin/python -m pytest   # 456 tests
-cd orchestrator && .venv/bin/python -m pytest   # 163 tests
+cd orchestrator && .venv/bin/python -m pytest   # 187 tests
 cd frontend     && npm run typecheck
 ```
 
@@ -136,7 +141,7 @@ tested against a scripted model.
 
 ```
 perception/     the real-time pipeline (FastAPI, OpenCV, Ultralytics, supervision)
-orchestrator/   the agent (LangGraph), its tools, phrase memory and event handling
+orchestrator/   the agent (LangGraph), its tools, phrase memory, event handling and evals
 frontend/       the operator console (React, TypeScript, Vite)
 linker/         the shared contract both services import
 PROJECT.md      design, decisions, what broke, and what is still wrong
